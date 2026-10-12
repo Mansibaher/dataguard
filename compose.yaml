@@ -1,0 +1,73 @@
+name: dataguard
+x-backend: &backend
+  build: ./backend
+  environment: &environment
+    DATABASE_URL: postgresql+psycopg://dataguard:dataguard@postgres:5432/dataguard
+    REDIS_URL: redis://redis:6379/0
+    JWT_SECRET: ${JWT_SECRET:-local-demo-only-replace-before-deployment-32chars}
+    DEMO_PASSWORD: ${DEMO_PASSWORD:-dataguard-demo}
+    FRONTEND_ORIGIN: http://localhost:3000
+    BATCH_SIZE: ${BATCH_SIZE:-250}
+    LEASE_SECONDS: ${LEASE_SECONDS:-15}
+    BATCH_DELAY: ${BATCH_DELAY:-0}
+  depends_on:
+    postgres: {condition: service_healthy}
+    redis: {condition: service_healthy}
+services:
+  postgres:
+    image: postgres:16.8-alpine
+    environment:
+      POSTGRES_USER: dataguard
+      POSTGRES_PASSWORD: dataguard
+      POSTGRES_DB: dataguard
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dataguard"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:7.4.2-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  migrate:
+    <<: *backend
+    command: sh -c "alembic upgrade head && python -m app.seed"
+  api:
+    <<: *backend
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      mock-source: {condition: service_started}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  worker:
+    <<: *backend
+    command: celery -A app.worker.celery worker --loglevel=INFO --concurrency=1
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  scheduler:
+    <<: *backend
+    command: celery -A app.worker.celery beat --loglevel=INFO
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  mock-source:
+    build: ./backend
+    command: uvicorn app.mock_source:app --host 0.0.0.0 --port 8090
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on:
+      api: {condition: service_healthy}
+volumes:
+  pgdata:

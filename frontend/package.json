@@ -1,0 +1,27 @@
+{
+  "name": "dataguard-ui",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0",
+    "build": "next build && node scripts/prepare-standalone.mjs",
+    "start": "node .next/standalone/server.js",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "lucide-react": "0.468.0"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
+    "tailwindcss": "4.1.5",
+    "@tailwindcss/postcss": "4.1.5",
+    "@playwright/test": "1.64.0"
+  }
+}

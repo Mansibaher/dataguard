@@ -1,0 +1,18 @@
+# Practical deployment on a small Linux VM
+
+This guide deploys the same Compose architecture on a single VM. It is a portfolio deployment plan, not a claim of production readiness. Use synthetic data until the listed authentication and operational limitations are resolved.
+
+1. Provision a Linux VM with Docker Compose, at least 2 CPU cores and 4 GiB RAM, and a persistent disk. Clone the repository. Pin the image tags already provided; review current security advisories before an external deployment.
+2. Put a reverse proxy (Caddy or Nginx) in front of the frontend and API, for example `https://dataguard.example.com` and `https://api.dataguard.example.com`. Obtain TLS certificates. Keep PostgreSQL and Redis private. The checked-in Compose ports bind to loopback; expose only the proxy's 443 port.
+3. Create an untracked `.env` with a random JWT secret of at least 32 bytes and a unique demo password. Set API `FRONTEND_ORIGIN` to the actual HTTPS frontend origin. Change the Compose frontend build argument `NEXT_PUBLIC_API_URL` to the HTTPS API origin and rebuild; this URL is compiled into the browser bundle. Change PostgreSQL credentials consistently in its environment and every backend DATABASE_URL. Avoid publishing the local demo credentials.
+4. Review `CONNECTOR_SOURCES`. Only administrator-approved endpoints may be configured. Set `CONNECTOR_TOKEN` through a secret manager or environment on the API container; do not commit it. Restrict outbound traffic if allowing untrusted external sources. The bundled mock source needs no key and can be retained for a synthetic demo.
+5. Run `docker compose config --quiet`, then `docker compose up -d --build`. The migration job runs before API/worker/scheduler. Confirm API `/health` and `/docs`, frontend login, upload, validation, and replay. Inspect `docker compose ps` and logs. The scheduler must run for automatic lease recovery.
+6. Run the PostgreSQL test suite against a **separate** database named with `test`. Never point tests at the live dataset database: test fixtures drop application tables and refuse databases without `test` in their name. Execute the hard-kill demo against synthetic datasets before describing this deployment as recovery-verified.
+7. Back up PostgreSQL with `pg_dump`; test restoration in a separate cluster. Database backups contain originals, audit proposals, passwords hashes, and normalized records. Encrypt and control access to them. Do not delete volumes to reset a demo; use the ownership-scoped reset command.
+8. Monitor API health, broker availability, queued-run age, expired lease age, failure rate, and database disk use. Configure log retention and PostgreSQL lock/statement timeouts for the deployment. Alert if scheduler or worker stops. A lease cannot override a connection that still holds a database row lock.
+
+Before exposing beyond a private portfolio demo, add login throttling and established OIDC/secure cookie sessions, account management and revocation, stronger secret handling, per-user storage quotas, migration rollback rehearsal, and backed-up/restore-tested persistence. Root containers, a single VM, single-worker processing, no HA, and no external security audit are current limitations.
+
+## Upgrade procedure
+
+Back up first, pause new run creation operationally, allow active runs to finish or cancel them, build the new images, run Alembic migrations, then start API/worker/scheduler/frontend. Configuration snapshots are retained per run. Check a small synthetic dataset before reopening traffic. Existing database migrations are immutable: add a new revision for schema changes.

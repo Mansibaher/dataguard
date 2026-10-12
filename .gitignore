@@ -1,0 +1,16 @@
+node_modules/
+.next/
+*.db
+__pycache__/
+.pytest_cache/
+.env
+*.pyc
+*.log
+playwright-report/
+test-results/
+celerybeat-schedule*
+
+.venv/
+*.tsbuildinfo
+demo-data/large-*.csv
+demo-data/synthetic-recovery.csv

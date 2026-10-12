@@ -1,0 +1,54 @@
+{
+  "environment": {
+    "os": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.9 (tags/v3.11.9:de54cf5, Apr  2 2024, 10:12:12) [MSC v.1938 64 bit (AMD64)]",
+    "machine": "AMD64",
+    "processor": "AMD64 Family 25 Model 116 Stepping 1, AuthenticAMD",
+    "cpu_count": 12,
+    "database": "postgresql",
+    "batch_size": "250",
+    "delivery": "direct call to production processing function; broker excluded",
+    "hardware": {
+      "cpu": "AMD Ryzen 5 PRO 7540U",
+      "physical_cores": 6,
+      "logical_cores": 12,
+      "installed_ram_bytes": 16405434368,
+      "postgresql": "16.8"
+    },
+    "background_load": "Frontend/API servers and a native polling worker for a separate UI database were running; intermittent pytest and browser tests overlapped. Shared host, not a controlled capacity test."
+  },
+  "results": [
+    {
+      "rows": 10000,
+      "dataset_id": "05917272-3ec7-4415-a348-d0e5a063ca1b",
+      "run_id": "ace23799-4b55-47e8-8ee9-03225bba2783",
+      "processing_seconds": 75.2415619000094,
+      "end_to_end_seconds": 77.39966799994,
+      "rows_per_second": 132.90526867702823,
+      "peak_python_allocated_bytes": 9027682,
+      "memory_method": "tracemalloc; Python allocations including ingestion, not total RSS; instrumentation enabled",
+      "accepted": 9996,
+      "quarantined": 4,
+      "expected_accepted": 9996,
+      "expected_quarantined": 4,
+      "duplicate_writes_after_2_redeliveries": 0,
+      "state": "completed_with_errors"
+    },
+    {
+      "rows": 100000,
+      "dataset_id": "88b49491-820c-41b6-ba30-dc515c3930bc",
+      "run_id": "c707a849-bf9e-4827-acc9-6dcdd8598118",
+      "processing_seconds": 752.3860296999337,
+      "end_to_end_seconds": 801.3148809999693,
+      "rows_per_second": 132.9104954804676,
+      "peak_python_allocated_bytes": 85339731,
+      "memory_method": "tracemalloc; Python allocations including ingestion, not total RSS; instrumentation enabled",
+      "accepted": 99996,
+      "quarantined": 4,
+      "expected_accepted": 99996,
+      "expected_quarantined": 4,
+      "duplicate_writes_after_2_redeliveries": 0,
+      "state": "completed_with_errors"
+    }
+  ]
+}
