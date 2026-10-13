@@ -10,7 +10,7 @@ import httpx
 from generate import generate
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--api", default="http://localhost:8000")
+parser.add_argument("--api", default="http://localhost:8001")
 args = parser.parse_args()
 client = httpx.Client(base_url=args.api, timeout=30)
 token = (

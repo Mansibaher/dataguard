@@ -17,7 +17,7 @@ docker compose config --quiet
 docker compose up -d --build
 ~~~
 
-Open [DataGuard](http://localhost:3000). API explorer: [FastAPI docs](http://localhost:8000/docs). Migration and seed jobs run before the application services.
+Open [DataGuard](http://localhost:3000). Docker exposes the API on port 8001 and keeps PostgreSQL internal to avoid conflicts with other local projects. API explorer: [FastAPI docs](http://localhost:8001/docs). Migration and seed jobs run before the application services.
 
 **Clearly labeled local demo login:** `demo@dataguard.local` / `dataguard-demo`. These defaults are for local synthetic demonstrations. Existing password hashes are preserved on re-seed; changing DEMO_PASSWORD only affects creation of the demo account.
 
@@ -103,7 +103,7 @@ docker compose up -d --force-recreate worker
 python scripts/worker-interruption.py
 ~~~
 
-This uploads 100,000 synthetic clean rows, observes a committed partial checkpoint, sends SIGKILL to the Celery worker, restarts it, waits for scheduler recovery, and asserts 100,000 accepted records with zero duplicates. It writes `docs/celery-recovery-results.json` only after successful assertions. This particular Docker path could not run on the build host because its Linux engine did not start.
+This uploads 100,000 synthetic clean rows, observes a committed partial checkpoint, sends SIGKILL to the Celery worker, restarts it, waits for scheduler recovery, and asserts 100,000 accepted records with zero duplicates. It writes `docs/celery-recovery-results.json` only after successful assertions. The full Compose stack now runs after a Docker runtime repair. This dedicated Celery interruption script has not yet been executed; see the verification ledger for exact scope.
 
 Generate larger fixtures without committing them:
 

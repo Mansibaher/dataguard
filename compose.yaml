@@ -20,7 +20,6 @@ services:
       POSTGRES_USER: dataguard
       POSTGRES_PASSWORD: dataguard
       POSTGRES_DB: dataguard
-    ports: ["127.0.0.1:5432:5432"]
     volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U dataguard"]
@@ -39,7 +38,7 @@ services:
     command: sh -c "alembic upgrade head && python -m app.seed"
   api:
     <<: *backend
-    ports: ["127.0.0.1:8000:8000"]
+    ports: ["127.0.0.1:8001:8000"]
     depends_on:
       migrate: {condition: service_completed_successfully}
       mock-source: {condition: service_started}
@@ -65,7 +64,7 @@ services:
     build:
       context: ./frontend
       args:
-        NEXT_PUBLIC_API_URL: http://localhost:8000
+        NEXT_PUBLIC_API_URL: http://localhost:8001
     ports: ["127.0.0.1:3000:3000"]
     depends_on:
       api: {condition: service_healthy}

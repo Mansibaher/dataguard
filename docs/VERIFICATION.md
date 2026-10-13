@@ -28,10 +28,12 @@ The final standalone Next.js server served both browser scenarios successfully. 
 
 ## Environment and limits
 
-Windows host, Python 3.11.9, Node 22.14.0, native PostgreSQL 16.8 bound to loopback on port 55432. AMD Ryzen 5 PRO 7540U, 6 physical / 12 logical cores, 16,405,434,368 bytes installed RAM. The processing benchmark records batch size 250, OS, CPU count, Python, and database dialect. Peak memory is Python allocation tracing, not database/Redis memory or complete process memory. Browser verification uses the portable database polling worker; production Compose uses Celery.
+Windows host, Python 3.11.9, Node 22.14.0, native PostgreSQL 16.8 bound to loopback on port 55432. AMD Ryzen 5 PRO 7540U, 6 physical / 12 logical cores, 16,405,434,368 bytes installed RAM. The processing benchmark records batch size 250, OS, CPU count, Python, and database dialect. Peak memory is Python allocation tracing, not database/Redis memory or complete process memory. Initial browser verification used the portable database polling worker. The repeat after Docker repair used the full Compose stack with Celery and Redis.
 
-## Not executed on this host
+## Docker verification after startup repair
 
-Docker Desktop's Linux engine did not initialize, so the complete Compose service startup, Redis-backed Celery delivery, Celery worker SIGKILL/restart integration script, container builds, and GitHub Actions jobs are **not runtime-verified here**. The Docker manifest parsed successfully; native PostgreSQL verifies database behavior independently. The CI workflow includes the full Compose/browser path for a Linux runner. No successful CI result or Docker recovery result is claimed.
+Docker Desktop initially failed on inaccessible AF_UNIX runtime sockets. The two affected communication directories were preserved under timestamped backup names; fresh runtime directories allowed Docker Engine 29.6.1 to start. No image, volume, or project data reset was performed.
 
-No hosted deployment was attempted: this request is a local repository build with a practical deployment guide. Optional statistical drift detection is deferred. No production-readiness or exactly-once execution claim is made.
+All DataGuard images built successfully and the complete Compose stack started. PostgreSQL and Redis are healthy, migration/seed completed, and API health returned OK. Frontend returned HTTP 200. Both Playwright scenarios passed against the full Docker/Celery/Redis stack (2 passed, 16.8 seconds), verifying CSV correction/replay and the live paginated HTTP connector. PostgreSQL is internal-only and the API uses host port 8001 because the existing DevPilot project already occupies 5432 and 8000.
+
+GitHub Actions has not been run. The dedicated Celery SIGKILL/restart integration script remains unexecuted; the earlier verified 2,000-row hard-kill result is still the native processing-core path. No hosted deployment was attempted. Optional statistical detection is deferred.
