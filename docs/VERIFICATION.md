@@ -1,5 +1,13 @@
 # Verification ledger
 
+## October 14, 2026: recurring Docker startup failure
+
+Docker was stopped and failed to restart with the same inaccessible `dockerInference` socket error. Preserving the two affected runtime communication folders and relaunching Docker restored Engine 29.6.1. DataGuard's existing database volume was retained.
+
+Added `Start-DataGuard.cmd` / `Start-DataGuard.ps1` with bounded readiness checks, a conditional backup-and-retry workaround for this exact failure, and actionable errors for other failures. Verified the launcher's normal startup path with Windows PowerShell and `-NoBrowser`: Compose started successfully, API health returned OK, and the webpage returned HTTP 200. Runtime services now use `restart: unless-stopped`; the one-shot migration service does not.
+
+Both browser scenarios passed against the restored full Docker stack: **2 passed, 15.2 seconds**. This is a startup workaround, not a permanent repair of the underlying Windows/Docker issue. The automated repair branch was not deliberately retriggered after restoring the engine; its underlying backup/relaunch operations were performed during this incident.
+
 Build date: October 12, 2026 (America/Los_Angeles). Results below distinguish real tests from supplied but unexecuted deployment paths.
 
 ## Executed

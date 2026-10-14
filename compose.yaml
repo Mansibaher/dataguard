@@ -15,6 +15,7 @@ x-backend: &backend
     redis: {condition: service_healthy}
 services:
   postgres:
+    restart: unless-stopped
     image: postgres:16.8-alpine
     environment:
       POSTGRES_USER: dataguard
@@ -27,6 +28,7 @@ services:
       timeout: 3s
       retries: 20
   redis:
+    restart: unless-stopped
     image: redis:7.4.2-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -37,6 +39,7 @@ services:
     <<: *backend
     command: sh -c "alembic upgrade head && python -m app.seed"
   api:
+    restart: unless-stopped
     <<: *backend
     ports: ["127.0.0.1:8001:8000"]
     depends_on:
@@ -48,19 +51,23 @@ services:
       timeout: 3s
       retries: 20
   worker:
+    restart: unless-stopped
     <<: *backend
     command: celery -A app.worker.celery worker --loglevel=INFO --concurrency=1
     depends_on:
       migrate: {condition: service_completed_successfully}
   scheduler:
+    restart: unless-stopped
     <<: *backend
     command: celery -A app.worker.celery beat --loglevel=INFO
     depends_on:
       migrate: {condition: service_completed_successfully}
   mock-source:
+    restart: unless-stopped
     build: ./backend
     command: uvicorn app.mock_source:app --host 0.0.0.0 --port 8090
   frontend:
+    restart: unless-stopped
     build:
       context: ./frontend
       args:

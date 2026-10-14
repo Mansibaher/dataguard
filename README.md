@@ -6,6 +6,12 @@ Upload a sales CSV, preview it, version its validation rules, process it in boun
 
 ![DataGuard dashboard](docs/dashboard.png)
 
+## Windows: one-click startup
+
+Double-click `Start-DataGuard.cmd` in this folder. It starts Docker when needed, starts DataGuard, waits for the API and webpage, and opens the app. If Docker encounters the diagnosed inaccessible temporary-socket error, the launcher preserves the affected runtime folders as timestamped backups and retries once. It does not reset Docker data or delete volumes. Other startup failures are reported without applying this repair.
+
+Runtime services use `restart: unless-stopped` so they resume when Docker returns, unless explicitly stopped. The launcher cannot permanently fix the underlying Windows/Docker socket issue. Its normal startup path was verified on October 14, 2026; the socket recovery steps were performed successfully during troubleshooting.
+
 ## Start the full application
 
 Requires Docker Desktop with its Linux engine running, or Docker Engine + Compose on Linux. From the repository root:
